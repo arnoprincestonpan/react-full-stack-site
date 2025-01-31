@@ -2,9 +2,9 @@ import express from 'express';
 
 // non-database JSON data
 const articleInfo = [
-    { name: 'learn-node', upvotes: 0 },
-    { name: 'learn-react' ,upvotes: 0 },
-    { name: 'mongodb', upvotes: 0 },
+    { name: 'learn-node', upvotes: 0, comments: [] },
+    { name: 'learn-react' ,upvotes: 0, comments: [] },
+    { name: 'mongodb', upvotes: 0, comments: [] },
 ]
 
 const app = express();
@@ -28,6 +28,30 @@ app.post('/api/articles/:name/upvote', (req, res) => {
     article.upvotes += 1;
     res.send('Success! The article ' + req.params.name + " now has " + article.upvotes + " upvotes.");
 })
+
+// comments endpoint
+app.post('/api/articles/:name/comments', (req, res) =>{
+    const {name} = req.params;
+    // const name = req.params; will assign the entire req.params to name, you'll need to do req.params.name
+    const { postedBy, text} = req.body;
+    // this is the JSON information that is required in the body of the POST request
+    const article = articleInfo.find(a => a.name === name);
+    // we're finding a name that matches the article name in the articleInfo array
+
+    article.comments.push({
+        postedBy,
+        text
+    });
+
+    // JSON in PostMan
+    // {
+    //     "postedBy" : "Shawn",
+    //     "text" : "Awesome article"
+    // }
+
+
+    res.json(article);
+});
 
 app.listen(8000, function(){
     console.log('Server is running on port 8000');
