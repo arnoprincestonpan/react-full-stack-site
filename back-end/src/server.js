@@ -1,13 +1,6 @@
 import express from 'express';
 import {MongoClient, ServerApiVersion} from 'mongodb';
 
-// non-database JSON data
-const articleInfo = [
-    { name: 'learn-node', upvotes: 0, comments: [] },
-    { name: 'learn-react' ,upvotes: 0, comments: [] },
-    { name: 'mongodb', upvotes: 0, comments: [] },
-]
-
 const app = express();
 
 let db;
@@ -33,26 +26,21 @@ app.get("/api/articles/:name", async (req, res) => {
     const {name} = req.params;
 
     const article = await db.collection('articles').findOne({name});
-    
+
     res.json(article);
 })
 
-app.get('/hello', (req, res) => {
-    res.send('Hello World!');
-})
+app.post('/api/articles/:name/upvote', async (req, res) => {
+    const { name } = req.params;
+    const { postedBy, text} = req.body;
 
-app.get('/hello/:name', (req, res) => {
-    res.send('Hello ' + req.params.name);
-})
+    const updatedArticle = await db.collection('articles').findOneAndUpdate({ name }, {
+        $push: { comments: newComment}
+    }, {
+        returnDocument: "after",
+    })
 
-app.post('/hello/', (req,res)=>{
-    res.send('Hello from a POST endpoint. Hi ' + req.body.name);
-})
-
-app.post('/api/articles/:name/upvote', (req, res) => {
-    const article = articleInfo.find(a => a.name === req.params.name);
-    article.upvotes += 1;
-    res.send('Success! The article ' + req.params.name + " now has " + article.upvotes + " upvotes.");
+    res.json(updatedArticle);
 })
 
 // comments endpoint
@@ -69,16 +57,14 @@ app.post('/api/articles/:name/comments', (req, res) =>{
         text
     });
 
-    // JSON in PostMan
-    // {
-    //     "postedBy" : "Shawn",
-    //     "text" : "Awesome article"
-    // }
-
-
     res.json(article);
 });
 
-app.listen(8000, function(){
-    console.log('Server is running on port 8000');
-})
+async function start(){
+    await connectToDB();
+    app.listen(8000, function(){
+        console.log('Server is running on port 8000');
+    })
+}
+
+start();
