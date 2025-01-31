@@ -1,4 +1,5 @@
 import express from 'express';
+import {MongoClient, ServerApiVersion} from 'mongodb';
 
 // non-database JSON data
 const articleInfo = [
@@ -9,7 +10,32 @@ const articleInfo = [
 
 const app = express();
 
+let db;
+
+async function connectToDB(){
+    const uri = 'mongodb://127.0.0.1:27017';
+
+    const client = new MongoClient(uri, {
+        serverApi: {
+            version: ServerApiVersion.v1,
+            struct: true,
+            deprecationErrors: true,
+        }
+    });
+
+    await client.connect();
+    db = client.db('full-stack-react-db');
+}
+
 app.use(express.json());
+
+app.get("/api/articles/:name", async (req, res) => {
+    const {name} = req.params;
+
+    const article = await db.collection('articles').findOne({name});
+    
+    res.json(article);
+})
 
 app.get('/hello', (req, res) => {
     res.send('Hello World!');
