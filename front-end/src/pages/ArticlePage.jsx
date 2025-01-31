@@ -1,7 +1,8 @@
 import { useParams, useLoaderData} from 'react-router-dom';
 import articles from '../article-content';
+import axios from 'axios';
 
-function ArticlePage() {
+export default function ArticlePage() {
   // const params = useParams();
   // const name = params.name;
   // object destructuring way: 
@@ -20,4 +21,12 @@ function ArticlePage() {
   )
 }
 
-export default ArticlePage
+export  async function loader({params}) {
+  const response = await axios.get("/api/articles/" + params.name);
+  const { upvotes, comments} = response.data;
+  return { upvotes, comments };
+  // avoid copying back-end URL, you have to make it think it's the same server in localhost
+  // it will be the same server when hosted
+  // you want to return the upvotes and comments; you can get them as an object (this way you can use them in <ArticlePage/>)
+}
+

@@ -6,10 +6,9 @@ import './App.css';
 import HomePage from './pages/HomePage';
 import ArticleListPage from './pages/ArticleListPage';
 import AboutPage from './pages/AboutPage';
-import ArticlePage from './pages/ArticlePage';
+import ArticlePage, { loader as articleLoader} from './pages/ArticlePage';
 import Layout from './pages/Layout';
 import NotFoundPage from './pages/NotFoundPage';
-import axios from 'axios';
 
 const routes = [{
   path: '/',
@@ -31,15 +30,8 @@ const routes = [{
     {
       path:'/articles/:name/', // URL parameter (you can call :name anything) -> catches all sub-routes of /articles/...
       element: <ArticlePage/>,
-      loader: async function() {
-        const response = await axios.get("/api/articles/learn-node");
-        const { upvotes, comments} = response.data;
-        return { upvotes, comments };
-        // avoid copying back-end URL, you have to make it think it's the same server in localhost
-        // it will be the same server when hosted
-        // you want to return the upvotes and comments; you can get them as an object (this way you can use them in <ArticlePage/>)
+      loader: articleLoader,
       }
-    }
   ]
 }]
 
